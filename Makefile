@@ -26,23 +26,23 @@ test:
 #push:
 #	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}
 
-build:
+image:
 	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) \
 	go build -v -o kbot -ldflags "-X=github.com/vcorneroff/kbot/cmd.appVersion=$(VERSION)"
 	docker build --platform=$(TARGETOS)/$(TARGETARCH) \
 		-t $(REGISTRY)/$(APP):$(VERSION)-$(TARGETARCH) .
 
 linux:
-	$(MAKE) build TARGETOS=linux TARGETARCH=amd64
+	$(MAKE) image TARGETOS=linux TARGETARCH=amd64
 
 windows:
-	$(MAKE) build TARGETOS=windows TARGETARCH=amd64
+	$(MAKE) image TARGETOS=windows TARGETARCH=amd64
 
 arm:
-	$(MAKE) build TARGETOS=linux TARGETARCH=arm64
+	$(MAKE) image TARGETOS=linux TARGETARCH=arm64
 
 macos:
-	$(MAKE) build TARGETOS=darwin TARGETARCH=amd64
+	$(MAKE) image TARGETOS=darwin TARGETARCH=amd64
 
 clean:
 	rm -f kbot
