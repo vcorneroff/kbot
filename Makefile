@@ -26,9 +26,11 @@ test:
 #push:
 #	docker push ${REGISTRY}/${APP}:${VERSION}-${TARGETARCH}
 
-image:
+build:
 	CGO_ENABLED=0 GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) \
 	go build -v -o kbot -ldflags "-X=github.com/vcorneroff/kbot/cmd.appVersion=$(VERSION)"
+
+image: build
 	docker build --platform=$(TARGETOS)/$(TARGETARCH) \
 		-t $(REGISTRY)/$(APP):$(VERSION)-$(TARGETARCH) .
 
