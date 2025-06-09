@@ -1,10 +1,18 @@
-FROM golang:1.24.1 as builder
+FROM --platform=$BUILDPLATFORM quay.io/projectquay/golang:1.24 AS builder
+
+ARG BUILDPLATFORM
+
 WORKDIR /go/src/app
 COPY . .
-RUN make build
+RUN export TARGETARCH=$(echo $BUILDPLATFORM | cut -d'/' -f2)
+RUN echo $TARGETARCH
+RUN make $TARGETARCH
+
+FROM --platform=linux/amd64 alpine:latest AS certs
+RUN apk add --no-cache ca-certificates
 
 FROM scratch
 WORKDIR /
 COPY --from=builder /go/src/app/kbot .
-COPY --from=alpine:latest /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 ENTRYPOINT [ "./kbot" ]
